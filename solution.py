@@ -59,16 +59,17 @@ class Variable:
 
         self.op(self)
         self.left.chain()
-        self.right.chain()
+        if self.right:
+            self.right.chain()
 
     def exp(self):
-        return Variable(math.exp(self.value))
+        return Variable(math.exp(self.value), left=self, op=d_exp)
 
     def log(self):
-        return Variable(math.log(self.value))
+        return Variable(math.log(self.value), left=self, op=d_log)
 
     def tanh(self):
-        return Variable(math.tanh(self.value))
+        return Variable(math.tanh(self.value), left=self, op=d_tanh)
 
 
 def d_add(me):
@@ -87,6 +88,15 @@ def d_div(me):
     me.left.d.value += me.d.value / me.right.value
     me.right.d.value -= (me.d.value * me.left.value) / \
                               (me.right.value**2)
+
+def d_exp(me):
+    me.left.d.value += me.d.value * math.exp(me.left.value)
+
+def d_log(me):
+    me.left.d.value += me.d.value * 1 / me.left.value
+
+def d_tanh(me):
+    me.left.d.value += me.d.value * 1 / ( math.cosh(me.left.value) ** 2 )
 
 
 class Deriv:
